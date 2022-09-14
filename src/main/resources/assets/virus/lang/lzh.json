@@ -1,0 +1,10 @@
+{
+  "block.virus.tap": "空滴皿", 
+  "block.virus.water_tap": "水滴皿", 
+  "block.virus.lava_tap": "熔岩滴皿", 
+  "item.minecraft.potion.effect.alcohol": "酒精劑", 
+  "item.minecraft.splash_potion.effect.alcohol": "酒精噴劑", 
+  "item.minecraft.lingering_potion.effect.alcohol": "酒精滯劑", 
+  "item.virus.mask": "罩", 
+  "entity.virus.virus": "毒"
+}

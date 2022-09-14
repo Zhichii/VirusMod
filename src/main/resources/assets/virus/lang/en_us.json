@@ -1,0 +1,10 @@
+{
+  "block.virus.tap": "Tap", 
+  "block.virus.water_tap": "Water Tap", 
+  "block.virus.lava_tap": "Lava Tap", 
+  "item.minecraft.potion.effect.alcohol": "Bottle of Alcohol", 
+  "item.minecraft.splash_potion.effect.alcohol": "Splash Bottle of Alcohol", 
+  "item.minecraft.lingering_potion.effect.alcohol": "Lingering Bottle of Alcohol", 
+  "item.virus.mask": "Mask", 
+  "entity.virus.virus": "Virus"
+}
