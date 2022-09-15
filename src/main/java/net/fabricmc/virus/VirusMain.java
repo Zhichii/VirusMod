@@ -2,10 +2,7 @@ package net.fabricmc.virus;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Material;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -37,9 +34,9 @@ public class VirusMain implements ModInitializer {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("virus");
 
-	public class FallDownEffect extends StatusEffect {
+	public class AlcoholEffect extends StatusEffect {
 
-		public FallDownEffect() {
+		public AlcoholEffect() {
 			super(
 					StatusEffectCategory.HARMFUL, // whether beneficial or harmful for entities
 					0xFFFFFF); // color in RGB
@@ -63,8 +60,8 @@ public class VirusMain implements ModInitializer {
 	}
 
 	public class MaskMaterial implements ArmorMaterial {
-		private static final int[] BASE_DURABILITY = new int[] {0, 0, 0, 0};
-		private static final int[] PROTECTION_VALUES = new int[] {1, 0, 0, 0};
+		private static final int[] BASE_DURABILITY = new int[] {0, 0, 0, 4};
+		private static final int[] PROTECTION_VALUES = new int[] {12, 0, 0, 0};
 
 		@Override
 		public int getDurability(EquipmentSlot slot) {
@@ -87,9 +84,7 @@ public class VirusMain implements ModInitializer {
 		}
 
 		@Override
-		public Ingredient getRepairIngredient() {
-			return Ingredient.ofItems();
-		}
+		public Ingredient getRepairIngredient() { return Ingredient.ofItems(Registry.ITEM.get(new Identifier("minecraft", "white_wool"))); }
 
 		@Override
 		public String getName() {
@@ -167,7 +162,7 @@ public class VirusMain implements ModInitializer {
 		}
 	}
 
-	public void reg() {
+	public void makeItems() {
 		Tap tap = new Tap(FabricBlockSettings.of(Material.METAL).hardness(0.5f));
 		WaterTap water_tap = new WaterTap(FabricBlockSettings.of(Material.METAL).hardness(0.5f));
 		LavaTap lava_tap = new LavaTap(FabricBlockSettings.of(Material.METAL).hardness(0.5f));
@@ -176,7 +171,8 @@ public class VirusMain implements ModInitializer {
 		BlockItem i_lava_tap = new BlockItem(lava_tap, new Item.Settings().group(ItemGroup.DECORATIONS));
 		ArmorMaterial maskMaterial = new MaskMaterial();
 		Item i_mask = new ArmorItem(maskMaterial, EquipmentSlot.HEAD, new Item.Settings().group(ItemGroup.COMBAT));
-		Potion i_alcohol = new Potion("alcohol", new StatusEffectInstance(new FallDownEffect(), 12));
+		Potion i_alcohol = new Potion("alcohol", new StatusEffectInstance(new AlcoholEffect(), 60, 1, true, true, true));
+
 		Registry.register(Registry.BLOCK, new Identifier("virus", "tap"), tap);
 		Registry.register(Registry.BLOCK, new Identifier("virus", "water_tap"), water_tap);
 		Registry.register(Registry.BLOCK, new Identifier("virus", "lava_tap"), lava_tap);
@@ -184,6 +180,7 @@ public class VirusMain implements ModInitializer {
 		Registry.register(Registry.ITEM, new Identifier("virus", "water_tap"), i_water_tap);
 		Registry.register(Registry.ITEM, new Identifier("virus", "lava_tap"), i_lava_tap);
 		Registry.register(Registry.ITEM, new Identifier("virus", "mask"), i_mask);
+		Registry.register(Registry.STATUS_EFFECT, new Identifier("virus", "alcohol"), new AlcoholEffect());
 		Registry.register(Registry.POTION, new Identifier("virus", "alcohol"), i_alcohol);
 	}
 
@@ -192,7 +189,7 @@ public class VirusMain implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
-		reg();
+		makeItems();
 		LOGGER.info("mod: test");
 	}
 }
