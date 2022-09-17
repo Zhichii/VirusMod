@@ -20,6 +20,9 @@
   "entrypoints": {
     "main": [
       "net.fabricmc.virus.VirusMain"
+    ],
+    "client": [
+      "net.fabricmc.virus.VirusClient"
     ]
   },
   "mixins": [

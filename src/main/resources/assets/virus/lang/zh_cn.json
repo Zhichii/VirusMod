@@ -6,6 +6,7 @@
   "item.minecraft.splash_potion.effect.alcohol": "喷溅型酒精瓶", 
   "item.minecraft.lingering_potion.effect.alcohol": "滞留型酒精瓶", 
   "item.virus.mask": "口罩", 
+  "item.virus.virus_spawn_egg": "病毒刷怪蛋", 
   "entity.virus.virus": "病毒", 
   "effect.virus.faint": "昏倒"
 }

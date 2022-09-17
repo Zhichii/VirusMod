@@ -6,6 +6,7 @@
   "item.minecraft.splash_potion.effect.alcohol": "Splash Bottle of Alcohol", 
   "item.minecraft.lingering_potion.effect.alcohol": "Lingering Bottle of Alcohol", 
   "item.virus.mask": "Mask", 
+  "item.virus.virus_spawn_egg": "Virus Spawn Egg", 
   "entity.virus.virus": "Virus", 
   "effect.virus.faint": "Faint"
 }
