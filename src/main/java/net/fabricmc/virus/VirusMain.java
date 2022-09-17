@@ -2,10 +2,17 @@ package net.fabricmc.virus;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.fabricmc.fabric.impl.object.builder.FabricEntityType;
 import net.minecraft.block.*;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.Monster;
+import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.passive.ChickenEntity;
+import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.effect.*;
 import net.minecraft.item.*;
@@ -30,13 +37,21 @@ import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static net.minecraft.util.BlockRotation.*;
+
 public class VirusMain implements ModInitializer {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("virus");
 
-	public class AlcoholEffect extends StatusEffect {
+	public class VirusEntity extends HostileEntity {
+		public VirusEntity(EntityType<? extends HostileEntity> entityType, World world) {
+			super(entityType, world);
+		}
+	}
 
-		public AlcoholEffect() {
+	public class FaintEffect extends StatusEffect {
+
+		public FaintEffect() {
 			super(
 					StatusEffectCategory.HARMFUL, // whether beneficial or harmful for entities
 					0xFFFFFF); // color in RGB
@@ -135,7 +150,7 @@ public class VirusMain implements ModInitializer {
 		}
 
 		public BlockState getPlacementState(ItemPlacementContext context) {
-			return this.getDefaultState().with(Properties.HORIZONTAL_FACING, context.getPlayerFacing());
+			return this.getDefaultState().with(Properties.HORIZONTAL_FACING, context.getPlayerFacing()).rotate(CLOCKWISE_180);
 		}
 	}
 
@@ -170,18 +185,25 @@ public class VirusMain implements ModInitializer {
 		BlockItem i_water_tap = new BlockItem(water_tap, new Item.Settings().group(ItemGroup.DECORATIONS));
 		BlockItem i_lava_tap = new BlockItem(lava_tap, new Item.Settings().group(ItemGroup.DECORATIONS));
 		ArmorMaterial maskMaterial = new MaskMaterial();
-		Item i_mask = new ArmorItem(maskMaterial, EquipmentSlot.HEAD, new Item.Settings().group(ItemGroup.COMBAT));
-		Potion i_alcohol = new Potion("alcohol", new StatusEffectInstance(new AlcoholEffect(), 60, 1, true, true, true));
+		Item mask = new ArmorItem(maskMaterial, EquipmentSlot.HEAD, new Item.Settings().group(ItemGroup.COMBAT));
+		StatusEffect faint = new FaintEffect();
+		Potion p_faint = new Potion("alcohol", new StatusEffectInstance(faint, 60, 1, true, true, true));
 
+		EntityType<VirusEntity> VIRUS;
+		VIRUS = Registry.register(
+				Registry.ENTITY_TYPE,
+				new Identifier("virus", "virus"),
+				EntityType.Builder.create(VirusEntity::new, SpawnGroup.MONSTER).setDimensions(0.4F, 0.7F).build("virus")
+		);
 		Registry.register(Registry.BLOCK, new Identifier("virus", "tap"), tap);
 		Registry.register(Registry.BLOCK, new Identifier("virus", "water_tap"), water_tap);
 		Registry.register(Registry.BLOCK, new Identifier("virus", "lava_tap"), lava_tap);
 		Registry.register(Registry.ITEM, new Identifier("virus", "tap"), i_tap);
 		Registry.register(Registry.ITEM, new Identifier("virus", "water_tap"), i_water_tap);
 		Registry.register(Registry.ITEM, new Identifier("virus", "lava_tap"), i_lava_tap);
-		Registry.register(Registry.ITEM, new Identifier("virus", "mask"), i_mask);
-		Registry.register(Registry.STATUS_EFFECT, new Identifier("virus", "alcohol"), new AlcoholEffect());
-		Registry.register(Registry.POTION, new Identifier("virus", "alcohol"), i_alcohol);
+		Registry.register(Registry.ITEM, new Identifier("virus", "mask"), mask);
+		Registry.register(Registry.STATUS_EFFECT, new Identifier("virus", "faint"), faint);
+		Registry.register(Registry.POTION, new Identifier("virus", "alcohol"), p_faint);
 	}
 
 	@Override
