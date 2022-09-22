@@ -19,10 +19,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.virus.VirusMain"
+      "net.virus.VirusMain"
     ],
     "client": [
-      "net.fabricmc.virus.VirusClient"
+      "net.virus.VirusClient"
     ]
   },
   "mixins": [

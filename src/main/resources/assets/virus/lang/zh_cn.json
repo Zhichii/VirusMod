@@ -7,6 +7,9 @@
   "item.minecraft.lingering_potion.effect.alcohol": "滞留型酒精瓶", 
   "item.virus.mask": "口罩", 
   "item.virus.virus_spawn_egg": "病毒刷怪蛋", 
+  "item.virus.helicopter": "直升机",
+  "item.virus.slow_faller": "缓降伞",
   "entity.virus.virus": "病毒", 
+  "entity.virus.helicopter": "直升机", 
   "effect.virus.faint": "昏倒"
 }

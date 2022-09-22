@@ -49,9 +49,7 @@ java {
 }
 
 jar {
-	from("LICENSE") {
-		rename { "mod.jar"}
-	}
+	from("LICENSE") {}
 }
 
 // configure the maven publication

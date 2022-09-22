@@ -5,8 +5,11 @@
   "item.minecraft.potion.effect.alcohol": "Bottle of Alcohol", 
   "item.minecraft.splash_potion.effect.alcohol": "Splash Bottle of Alcohol", 
   "item.minecraft.lingering_potion.effect.alcohol": "Lingering Bottle of Alcohol", 
-  "item.virus.mask": "Mask", 
+  "item.virus.mask": "Mask",
   "item.virus.virus_spawn_egg": "Virus Spawn Egg", 
+  "item.virus.helicopter": "Helicopter",
+  "item.virus.slow_faller": "Slow Faller",
   "entity.virus.virus": "Virus", 
+  "entity.virus.helicopter": "Helicopter", 
   "effect.virus.faint": "Faint"
 }

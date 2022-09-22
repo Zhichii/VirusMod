@@ -1,6 +1,6 @@
-package net.fabricmc.virus.mixin;
+package net.virus.mixin;
 
-import net.fabricmc.virus.VirusMain;
+import net.virus.VirusMain;
 import net.minecraft.client.gui.screen.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

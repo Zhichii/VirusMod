@@ -1,8 +1,8 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "s s",
-    "###"
+    "###",
+    "s s"
   ],
   "key": {
     "#": {
@@ -13,6 +13,6 @@
     }
   },
   "result": {
-    "item": "virus:mask"
+    "item": "virus:slow_faller"
   }
 }

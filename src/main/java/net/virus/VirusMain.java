@@ -1,25 +1,24 @@
-package net.fabricmc.virus;
+package net.virus;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.mixin.object.builder.DefaultAttributeRegistryAccessor;
-import net.minecraft.block.*;
-import net.minecraft.client.model.*;
-import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Material;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.MobEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.EntityModelPartNames;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.mob.FlyingEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.Monster;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.effect.*;
 import net.minecraft.item.*;
 import net.minecraft.potion.Potion;
 import net.minecraft.recipe.Ingredient;
@@ -39,53 +38,20 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.virus.entities.Helicopter;
+import net.virus.entities.Virus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static net.minecraft.util.BlockRotation.*;
+import static net.minecraft.util.BlockRotation.CLOCKWISE_180;
+import static net.virus.entities.Helicopter.HELICOPTER;
+import static net.virus.entities.Helicopter.helicopter;
+import static net.virus.entities.Virus.VIRUS;
+import static net.virus.entities.Virus.virus_spawn_egg;
 
 public class VirusMain implements ModInitializer {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("virus");
-
-	public static class VirusEntity extends FlyingEntity implements Monster {
-		private final boolean summonable = true;
-		public VirusEntity(EntityType<? extends FlyingEntity> entityType, World world) {
-			super(entityType, world);
-		}
-
-		//public void tick() {
-		//	if (this.hasStatusEffect(faint)) {
-		//		this.kill();
-		//		//BlockPos test = new BlockPos(this.getBlockX(), this.getBlockY(), this.getBlockZ());
-		//	}
-		//}
-	}
-	public static class VirusEntityModel extends EntityModel<VirusEntity> {
-
-		private final ModelPart base;
-
-		public VirusEntityModel(ModelPart modelPart) {
-			this.base = modelPart.getChild(EntityModelPartNames.CUBE);
-		}
-
-		public static TexturedModelData getTexturedModelData() {
-			ModelData modelData = new ModelData();
-			ModelPartData modelPartData = modelData.getRoot();
-			modelPartData.addChild(EntityModelPartNames.CUBE, ModelPartBuilder.create().uv(0, 0).cuboid(0F, 0F, 0F, 1F, 1F, 1F), ModelTransform.pivot(0F, 0F, 0F));
-			return TexturedModelData.of(modelData, 1, 1);
-		}
-
-		@Override
-		public void setAngles(VirusEntity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {}
-
-		@Override
-		public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
-			ImmutableList.of(this.base).forEach((modelRenderer) -> {
-				modelRenderer.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-			});
-		}
-	}
 
 	public static class FaintEffect extends StatusEffect {
 
@@ -137,7 +103,7 @@ public class VirusMain implements ModInitializer {
 		}
 
 		@Override
-		public Ingredient getRepairIngredient() { return Ingredient.ofItems(Registry.ITEM.get(new Identifier("minecraft", "white_wool"))); }
+		public Ingredient getRepairIngredient() { return Ingredient.ofItems(Items.WHITE_WOOL); }
 
 		@Override
 		public String getName() {
@@ -183,7 +149,6 @@ public class VirusMain implements ModInitializer {
 
 		@Override
 		public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-
 			return ActionResult.SUCCESS;
 		}
 
@@ -198,7 +163,8 @@ public class VirusMain implements ModInitializer {
 			setDefaultState(this.stateManager.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.SOUTH));
 		}
 		public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-			world.playSound(player, pos, SoundEvents.BLOCK_POINTED_DRIPSTONE_DRIP_WATER, SoundCategory.BLOCKS, 200f, 1f);
+			world.breakBlock(pos, true);
+			world.playSound(player, pos, SoundEvents.BLOCK_POINTED_DRIPSTONE_DRIP_WATER, SoundCategory.BLOCKS, 1F, 1f);
 			return ActionResult.SUCCESS;
 		}
 	}
@@ -215,6 +181,21 @@ public class VirusMain implements ModInitializer {
 		}
 	}
 
+	public class SlowFaller extends Item {
+		public SlowFaller(Settings settings) {
+			super(settings);
+		}
+
+		public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+			if ( selected || (slot == EquipmentSlot.OFFHAND.getEntitySlotId()) ) {
+				if (entity instanceof PlayerEntity) {
+					((PlayerEntity)entity).addStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING));
+					((PlayerEntity)entity).limbAngle = 0;
+				}
+			}
+		}
+	}
+
 	public Tap tap = new Tap(FabricBlockSettings.of(Material.METAL).hardness(0.5f));
 	public WaterTap water_tap = new WaterTap(FabricBlockSettings.of(Material.METAL).hardness(0.5f));
 	public LavaTap lava_tap = new LavaTap(FabricBlockSettings.of(Material.METAL).hardness(0.5f));
@@ -223,17 +204,12 @@ public class VirusMain implements ModInitializer {
 	public BlockItem i_lava_tap = new BlockItem(lava_tap, new Item.Settings().group(ItemGroup.DECORATIONS));
 	public ArmorMaterial maskMaterial = new MaskMaterial();
 	public Item mask = new ArmorItem(maskMaterial, EquipmentSlot.HEAD, new Item.Settings().group(ItemGroup.COMBAT));
+	public SlowFaller slow_faller = new SlowFaller(new Item.Settings().group(ItemGroup.TOOLS));
 	public static StatusEffect faint = new FaintEffect();
 	public Potion p_faint = new Potion("alcohol", new StatusEffectInstance(faint, 60, 1, true, true, true));
-	public static EntityType<VirusEntity> VIRUS = Registry.register(
-			Registry.ENTITY_TYPE,
-			new Identifier("virus", "virus"),
-			EntityType.Builder.create(VirusEntity::new, SpawnGroup.MONSTER).setDimensions(0.75F, 0.75F).build("virus")
-	);;
-	public static final Item virus_spawn_egg = new SpawnEggItem(VIRUS, 0xffffff, 0xaaaaaa, new Item.Settings().group(ItemGroup.MISC));
 
-	public void makeItems() {
-		DefaultAttributeRegistryAccessor.getRegistry().put(VIRUS, VirusEntity.createMobAttributes().add(EntityAttributes.GENERIC_ATTACK_DAMAGE).build());
+	public void reg() {
+		DefaultAttributeRegistryAccessor.getRegistry().put(VIRUS, Virus.VirusEntity.createMobAttributes().add(EntityAttributes.GENERIC_ATTACK_DAMAGE).build());
 		Registry.register(Registry.BLOCK, new Identifier("virus", "tap"), tap);
 		Registry.register(Registry.BLOCK, new Identifier("virus", "water_tap"), water_tap);
 		Registry.register(Registry.BLOCK, new Identifier("virus", "lava_tap"), lava_tap);
@@ -241,9 +217,11 @@ public class VirusMain implements ModInitializer {
 		Registry.register(Registry.ITEM, new Identifier("virus", "water_tap"), i_water_tap);
 		Registry.register(Registry.ITEM, new Identifier("virus", "lava_tap"), i_lava_tap);
 		Registry.register(Registry.ITEM, new Identifier("virus", "mask"), mask);
+		Registry.register(Registry.ITEM, new Identifier("virus", "slow_faller"), slow_faller);
+		Registry.register(Registry.ITEM, new Identifier("virus", "virus_spawn_egg"), virus_spawn_egg);
+		Registry.register(Registry.ITEM, new Identifier("virus", "helicopter"), helicopter);
 		Registry.register(Registry.STATUS_EFFECT, new Identifier("virus", "faint"), faint);
 		Registry.register(Registry.POTION, new Identifier("virus", "alcohol"), p_faint);
-		Registry.register(Registry.ITEM, new Identifier("virus", "virus_spawn_egg"), virus_spawn_egg);
 	}
 
 	@Override
@@ -251,19 +229,7 @@ public class VirusMain implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
-		makeItems();
+		reg();
 		LOGGER.info("mod: test");
-	}
-
-	public static class VirusEntityRenderer extends MobEntityRenderer<VirusEntity, VirusEntityModel> {
-
-		public VirusEntityRenderer(EntityRendererFactory.Context context) {
-			super(context, new VirusEntityModel(context.getPart(VirusClient.MODEL_CUBE_LAYER)), 0.5f);
-		}
-
-		@Override
-		public Identifier getTexture(VirusEntity entity) {
-			return new Identifier("entitytesting", "textures/entity/cube/cube.png");
-		}
 	}
 }

@@ -1,0 +1,15 @@
+{
+  "block.virus.tap": "空龍頭", 
+  "block.virus.water_tap": "水龍頭", 
+  "block.virus.lava_tap": "熔岩龍頭", 
+  "item.minecraft.potion.effect.alcohol": "酒精瓶", 
+  "item.minecraft.splash_potion.effect.alcohol": "噴濺型酒精瓶", 
+  "item.minecraft.lingering_potion.effect.alcohol": "滯留型酒精瓶", 
+  "item.virus.mask": "口罩", 
+  "item.virus.virus_spawn_egg": "病毒刷怪蛋", 
+  "item.virus.helicopter": "直升機",
+  "item.virus.slow_faller": "緩降傘",
+  "entity.virus.virus": "病毒", 
+  "entity.virus.helicopter": "直升機", 
+  "effect.virus.faint": "昏倒"
+}

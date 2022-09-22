@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "iii",
+    " s ",
+    "iii",
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:iron_ingot"
+    },
+    "r": {
+      "item": "minecraft:redstone_dust"
+    }
+  },
+  "result": {
+    "item": "virus:helicopter"
+  }
+}
