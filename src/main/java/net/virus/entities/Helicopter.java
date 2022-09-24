@@ -332,7 +332,7 @@ public class Helicopter implements ModInitializer {
 			EntityType.Builder.create(HelicopterEntity::new, SpawnGroup.MISC).setDimensions(0.75F, 0.75F).build("helicopter")
 	);
 
-	public static final Item helicopter = new HelicopterItem(new Item.Settings().group(ItemGroup.MISC));
+	public static final Item helicopter = new HelicopterItem(new Item.Settings().group(ItemGroup.REDSTONE));
 
 	public static class HelicopterEntityRenderer extends EntityRenderer<HelicopterEntity> {
 
