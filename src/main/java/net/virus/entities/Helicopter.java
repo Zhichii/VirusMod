@@ -15,6 +15,9 @@ import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.*;
+import net.minecraft.entity.attribute.AttributeContainer;
+import net.minecraft.entity.attribute.DefaultAttributeRegistry;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -30,6 +33,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockLocating;
@@ -55,9 +59,10 @@ public class Helicopter implements ModInitializer {
 	public static class HelicopterEntity extends Entity implements JumpingMount {
 
 		private final boolean summonable = true;
+		private float jumpStrength;
 
-		public HelicopterEntity(EntityType<? extends HelicopterEntity> entityType, World world) {
-			super(entityType, world);
+		public HelicopterEntity(EntityType<?> type, World world) {
+			super(type, world);
 		}
 
 		@Override
@@ -100,9 +105,8 @@ public class Helicopter implements ModInitializer {
 					this.setPitch(livingEntity.getPitch() * 0.5F);
 					this.setRotation(this.getYaw(), this.getPitch());
 					float f = livingEntity.sidewaysSpeed * 0.5F;
-					float u = livingEntity.upwardSpeed;
 					float g = livingEntity.forwardSpeed;
-					this.travel(new Vec3d(f, u, g));
+					this.travel(new Vec3d(f, this.jumpStrength, g));
 
 					this.tryCheckBlockCollision();
 				}
@@ -113,10 +117,12 @@ public class Helicopter implements ModInitializer {
 			if (this.isTouchingWater()) {
 				this.updateVelocity(0.02F, movementInput);
 				this.move(MovementType.SELF, this.getVelocity());
+				this.jumpStrength = this.jumpStrength * 0.800000011920929F;
 				this.setVelocity(this.getVelocity().multiply(0.800000011920929));
 			} else if (this.isInLava()) {
 				this.updateVelocity(0.02F, movementInput);
 				this.move(MovementType.SELF, this.getVelocity());
+				this.jumpStrength = this.jumpStrength * 0.5F;
 				this.setVelocity(this.getVelocity().multiply(0.5));
 			} else {
 				float f = 0.91F;
@@ -132,12 +138,15 @@ public class Helicopter implements ModInitializer {
 
 				this.updateVelocity(this.onGround ? 0.04F * g : 0.08F, movementInput);
 				this.move(MovementType.SELF, this.getVelocity());
+				this.jumpStrength = this.jumpStrength * f;
 				this.setVelocity(this.getVelocity().multiply(f));
 			}
 		}
 
 		@Override
-		public void setJumpStrength(int strength) { }
+		public void setJumpStrength(int strength) {
+			this.jumpStrength = 0.4F + 0.4F * (float)strength / 90.0F;;
+		}
 
 		@Override
 		public boolean canJump() { return true; }
@@ -354,11 +363,11 @@ public class Helicopter implements ModInitializer {
 		public void render(HelicopterEntity helicopterEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
 			matrixStack.push();
 			matrixStack.scale(-1.0F, -1.0F, 1.0F);
-			this.model.setAngles(helicopterEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+			this.model.setAngles(helicopterEntity, 0.0F, 0.0F, 0.0F, helicopterEntity.getYaw(), helicopterEntity.getPitch());
 			VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(this.model.getLayer(TEXTURE));
 			this.model.render(matrixStack, vertexConsumer, i, OverlayTexture.DEFAULT_UV, 1.0F, 1.0F, 1.0F, 1.0F);
 			matrixStack.pop();
-			super.render(helicopterEntity, f, g, matrixStack, vertexConsumerProvider, i);
+			super.render(helicopterEntity, helicopterEntity.getYaw(), helicopterEntity.getPitch(), matrixStack, vertexConsumerProvider, i);
 		}
 	}
 }

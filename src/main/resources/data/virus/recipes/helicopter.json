@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "iii",
-    " si",
+    " ri",
     "iii"
   ],
   "key": {
@@ -10,7 +10,7 @@
       "item": "minecraft:iron_ingot"
     },
     "r": {
-      "item": "minecraft:redstones"
+      "item": "minecraft:redstone"
     }
   },
   "result": {

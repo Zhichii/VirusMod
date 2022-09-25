@@ -1,12 +1,12 @@
 package net.virus;
 
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Material;
-import net.minecraft.block.ShapeContext;
+import net.fabricmc.fabric.mixin.object.builder.DefaultAttributeRegistryAccessor;
+import net.minecraft.block.*;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
@@ -18,6 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.potion.Potion;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -29,6 +30,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -39,7 +41,6 @@ import net.virus.entities.Virus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static net.minecraft.util.BlockRotation.CLOCKWISE_180;
 import static net.virus.entities.Helicopter.helicopter;
 import static net.virus.entities.Virus.virus_spawn_egg;
 
@@ -50,9 +51,7 @@ public class VirusMain implements ModInitializer {
 	public static class FaintEffect extends StatusEffect {
 
 		public FaintEffect() {
-			super(
-					StatusEffectCategory.HARMFUL, // whether beneficial or harmful for entities
-					0xFFFFFF); // color in RGB
+			super(StatusEffectCategory.HARMFUL, 0xFFFFFF);
 		}
 
 		@Override
@@ -62,9 +61,7 @@ public class VirusMain implements ModInitializer {
 
 		@Override
 		public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-			if (entity instanceof PlayerEntity) {
-				((PlayerEntity)entity).setMovementSpeed(0.1f);
-			}
+			entity.setMovementSpeed(0.0F);
 		}
 
 	}
@@ -150,7 +147,7 @@ public class VirusMain implements ModInitializer {
 
 		@Override
 		public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
-			Block.dropStack((World)world, pos, new ItemStack(this.asItem()));
+			world.spawnEntity(new ItemEntity((World)world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(this.asItem())));
 		}
 
 		@Override
@@ -210,12 +207,14 @@ public class VirusMain implements ModInitializer {
 
 	}
 
-	public Tap tap = new Tap(Block.Settings.of(Material.METAL).hardness(0.5f));
-	public WaterTap water_tap = new WaterTap(Block.Settings.of(Material.METAL).hardness(0.5f));
-	public LavaTap lava_tap = new LavaTap(Block.Settings.of(Material.METAL).hardness(0.5f));
-	public BlockItem i_tap = new BlockItem(tap, new Item.Settings().group(ItemGroup.DECORATIONS));
-	public BlockItem i_water_tap = new BlockItem(water_tap, new Item.Settings().group(ItemGroup.DECORATIONS));
-	public BlockItem i_lava_tap = new BlockItem(lava_tap, new Item.Settings().group(ItemGroup.DECORATIONS));
+	public Block.Settings tap_settings = Block.Settings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(5.0F, 6.0F).sounds(BlockSoundGroup.METAL);
+	public Tap tap = new Tap(tap_settings);
+	public WaterTap water_tap = new WaterTap(tap_settings);
+	public LavaTap lava_tap = new LavaTap(tap_settings);
+	public Item.Settings i_tap_settings = new Item.Settings().group(ItemGroup.DECORATIONS);
+	public BlockItem i_tap = new BlockItem(tap, i_tap_settings);
+	public BlockItem i_water_tap = new BlockItem(water_tap, i_tap_settings);
+	public BlockItem i_lava_tap = new BlockItem(lava_tap, i_tap_settings);
 	public ArmorMaterial maskMaterial = new MaskMaterial();
 	public Item mask = new ArmorItem(maskMaterial, EquipmentSlot.HEAD, new Item.Settings().group(ItemGroup.COMBAT));
 	public SlowFaller slow_faller = new SlowFaller(new Item.Settings().group(ItemGroup.TOOLS));
@@ -223,7 +222,7 @@ public class VirusMain implements ModInitializer {
 	public Potion p_faint = new Potion("alcohol", new StatusEffectInstance(faint, 60, 1, true, true, true));
 
 	public void reg() {
-		Virus.VirusEntity.createMobAttributes().add(EntityAttributes.GENERIC_ATTACK_DAMAGE).build();
+		DefaultAttributeRegistryAccessor.getRegistry().put(Virus.VIRUS, Virus.VirusEntity.createMobAttributes().add(EntityAttributes.GENERIC_ATTACK_DAMAGE).build());
 		Registry.register(Registry.BLOCK, new Identifier("virus", "tap"), tap);
 		Registry.register(Registry.BLOCK, new Identifier("virus", "water_tap"), water_tap);
 		Registry.register(Registry.BLOCK, new Identifier("virus", "lava_tap"), lava_tap);
